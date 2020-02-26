@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+
+<head>
+<title>LIO Open Data Service Index</title>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<h1 style="width:600px;margin: 0 auto;">LIO Open Data Service Index</h1>
+
+<ul id="item_list">
+</ul>
+
+<script type="text/javascript">
+
+
+    function SortList ( a, b ) {
+
+        // Cache inner content from the first element (a) and the next sibling (b)
+        var aText = a.innerText;
+        var bText = b.innerText;
+    
+        // Returning -1 will place element `a` before element `b`
+        if ( aText < bText ) {
+            return -1;
+        }
+
+        // Returning 1 will do the opposite
+        if ( aText > bText ) {
+            return 1;
+        }
+
+        // Returning 0 leaves them as-is
+        return 0;
+    };
+
+    function SortItemList(item) {
+
+        var elems = $("#item_list").children("li");
+
+        elems.sort(SortList);
+        $("#item_list").append(elems);
+    }
+
+    // Build list of items
+ 
+    var services_directory = "https://ws.lioservices.lrc.gov.on.ca/arcgis1071a/rest/services";
+
+    var open_services_folder = "LIO_OPEN_DATA";
+
+    var url = services_directory + "/" + open_services_folder + "?f=json"
+
+    $.get(url).done(function(response) {
+        
+        $.each(response.services, function(key,val) {
+
+            if (val["type"] == "MapServer") {
+
+                var service_name = val["name"];
+                
+                url = services_directory + "/" + service_name + "/MapServer?f=json";
+
+                $.get(url).done(function(response) {
+                    
+                    $.each(response.layers, function(key, val) {
+
+                       
+                        $("<li>").append($("<a>", 
+                                        {text: val["name"],
+                                         title:  val["name"] + " [LAYER]",
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+                                 .append(" [LAYER - " + service_name + "]")   
+                                         
+                                         .appendTo("#item_list");
+                        SortItemList();
+
+                    });
+
+                    $.each(response.tables, function(key, val) {
+
+                       
+                        $("<li>").append($("<a>", 
+                                        {text: val["name"],
+                                         title:  val["name"] + " [TABLE]",
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+                                 .append(" [TABLE - " + service_name + "]")   
+                                         .appendTo("#item_list");
+                        SortItemList();
+
+                    });
+
+                });
+
+            }
+        });
+
+       
+    });
+
+</script>
+
+</body>
+
+<html>
