@@ -3,6 +3,8 @@
 
 <head>
 <title>LIO Open Data Service Index</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 <style type="text/css">
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
@@ -28,15 +30,63 @@
 
 <body>
 
-<h1 style="width:600px;margin: 0 auto;text-align:center;">LIO Open Data Service Index</h1>
+<h1 style="width:600px;margin: 0 auto;padding-bottom:10px;text-align:center;">LIO Open Data Service Index</h1>
+
 
 
 <div style="margin: 20px auto; " class="loader"></div>
-<ul style="display:none;" id="item_list">
-</ul>
+<div id="main" class="container" style="display:none;">
+<strong style="margin-left: 10px;">Sort by:</strong> 
+<div class="form-check form-check-inline">
+    <input type="radio" class="form-check-input layer-sort" id="sortByLayerName" name="sortBy" value="Layer Name" checked="True">
+    <label class="form-check-label" for="sortByLayerName">Layer Name</label>
+</div>
+<div class="form-check form-check-inline">
+    <input type="radio" class="form-check-input layer-sort" id="sortByService" name="sortBy" value="Service">
+    <label class="form-check-label" for="sortByService">Service</label>
+</div>
+<strong>Display layer types: </strong>
+<div class="form-check form-check-inline">
+    <input type="checkbox" class="form-check-input" id="layertypeTable" name="Table" value="Table" checked="True"> 
+    <label class="form-check-label" for="layertypeTable">Table</label>
+</div>
+<div class="form-check form-check-inline">
+    <input type="checkbox" class="form-check-input" id="layertypeFeatureLayer" name="Feature Layer" value="Feature Layer" checked="True">
+    <label class="form-check-label" for="layertypeFeatureLayer">Layer</label>
+</div>
 
+<div id="byLayer" style="display:none;padding-top:10px;">
+<table id="item_list" class="table">
+<tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Geometry Type</th>
+    <th>Service Name</th>
+</tr>
+
+</table>
+</div>
+<div id="byService"  style="display:none;padding-top:10px;">
+<h2 style="margin-left:10px;">Layers</h2>
+<table id="item_list_byService_layers" class="table">
+<tr>
+    <th>Service Name</th>
+    <th>Layer Id</th>
+    <th>Name</th>
+    <th>Geometry Type</th>
+</tr>
+</table>
+<h2 style="margin-left:10px;">Tables</h2>
+<table id="item_list_byService_tables" class="table">
+<tr>
+    <th>Service Name</th>
+    <th>Layer Id</th>
+    <th>Name</th>
+</tr>
+</table>
+</div>
+</div>
 <script type="text/javascript">
-
 
     function SortList ( a, b ) {
 
@@ -58,13 +108,15 @@
         return 0;
     };
 
-    function SortItemList(item) {
+    function initialSort() {
 
-        var elems = $("#item_list").children("li");
+        var elems = $("#item_list > tbody").children("tr");
 
         elems.sort(SortList);
         $("#item_list").append(elems);
     }
+
+    
 
     // Build list of items
  
@@ -74,6 +126,47 @@
 
     var url = services_directory + "/" + open_services_folder + "?f=json"
 
+    $(".layer-sort").on('click', function() {
+        if ($('input[name=sortBy]:checked').val() == "Layer Name") {
+            $("#byLayer").show();
+            $("#byService").hide();
+        }
+        else 
+        {
+            $("#byLayer").hide();
+            $("#byService").show();
+        }
+
+    });
+
+    $("#layertypeFeatureLayer").on('click', function() {
+
+        if (this.checked) {
+            $("#item_list_byService_layers").show();
+            $(".feature-layer").show();
+        }
+        else
+        {
+            $("#item_list_byService_layers").hide();
+            $(".feature-layer").hide();
+        }
+
+    });
+
+      $("#layertypeTable").on('click', function() {
+
+        if (this.checked) {
+            $("#item_list_byService_tables").show();
+            $(".standalone-table").show();
+        }
+        else
+        {
+            $("#item_list_byService_tables").hide();
+            $(".standalone-table").hide();
+        }
+
+    });
+
     $.get(url).done(function(response) {
         
         $.each(response.services, function(key,val) {
@@ -82,34 +175,79 @@
 
                 var service_name = val["name"];
                 
+                
+                
                 url = services_directory + "/" + service_name + "/MapServer?f=json";
 
                 $.get(url).done(function(response) {
                     
                     $.each(response.layers, function(key, val) {
+                        var layer_index = val["id"];
+                        var geom_type = val["geometryType"];
+                        var tr = $("<tr>");
+                        tr.addClass("feature-layer");
+                        var td1 = $("<td>");
 
-                       
-                        $("<li>").append($("<a>", 
+                        td1.append($("<a>", 
                                         {text: val["name"],
-                                         title:  val["name"] + " [LAYER]",
+                                         title:  val["name"],
                                          href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
-                                 .append(" [LAYER - " + service_name + "]")   
-                                         
-                                         .appendTo("#item_list");
-                        SortItemList();
+
+                        var td2 = $("<td>Feature Layer</td>");
+                        var td3 = $("<td>" + geom_type + "</td>");
+                        var td4 = $("<td>" + service_name + "</td>");
+
+                        tr.append(td1).append(td2).append(td3).append(td4).appendTo("#item_list");
+
+                        initialSort();
+
+                        var tr = $("<tr>");
+                        var td1 = $("<td>");
+
+                        td1.append($("<a>", 
+                                        {text: val["name"],
+                                         title:  val["name"],
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+
+                        var td3 = $("<td>" + geom_type + "</td>");
+                        var td4 = $("<td>" + service_name + "</td>");
+                        var td5 =  $("<td>" + layer_index + "</td>");
+
+                        tr.append(td4).append(td5).append(td1).append(td3).appendTo("#item_list_byService_layers");
 
                     });
 
                     $.each(response.tables, function(key, val) {
+                        var layer_index = val["id"];
+                        var tr = $("<tr>");
+                        tr.addClass("standalone-table");
+                        var td1 = $("<td>");
 
-                       
-                        $("<li>").append($("<a>", 
+                        td1.append($("<a>", 
                                         {text: val["name"],
-                                         title:  val["name"] + " [TABLE]",
+                                         title:  val["name"],
                                          href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
-                                 .append(" [TABLE - " + service_name + "]")   
-                                         .appendTo("#item_list");
-                        SortItemList();
+
+                        var td2 = $("<td>Table</td>");
+                        var td3 = $("<td>-</td>");
+                        var td4 = $("<td>" + service_name + "</td>");
+
+                        tr.append(td1).append(td2).append(td3).append(td4).appendTo("#item_list");
+
+                        initialSort();
+
+                        var tr = $("<tr>");
+                        var td1 = $("<td>");
+
+                        td1.append($("<a>", 
+                                        {text: val["name"],
+                                         title:  val["name"],
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+
+                        var td4 = $("<td>" + service_name + "</td>");
+                        var td5 =  $("<td>" + layer_index + "</td>");
+
+                        tr.append(td4).append(td5).append(td1).appendTo("#item_list_byService_tables");
 
                     });
 
@@ -119,8 +257,13 @@
         });
 
         setTimeout(
-            function () {$("#item_list").show(); 
-                         $(".loader").hide();}, 5000);
+            function () {
+              
+                $("#main").show();
+                $("#byLayer").show();
+                $(".loader").hide();
+                
+                }, 5000);
 
        
     });
