@@ -174,43 +174,52 @@
             if (val["type"] == "MapServer") {
 
                 var service_name = val["name"];
+                var service_name_abbr = service_name.split("/")[1];
+
                 
-                
-                
+
+
                 url = services_directory + "/" + service_name + "/MapServer?f=json";
 
                 $.get(url).done(function(response) {
                     
                     $.each(response.layers, function(key, val) {
+                      
                         var layer_index = val["id"];
                         var geom_type = val["geometryType"];
-                        var tr = $("<tr>");
-                        tr.addClass("feature-layer");
-                        var td1 = $("<td>");
+                        var tr_lyr = $("<tr>");
+                        tr_lyr.addClass("feature-layer");
+                        var td1_lyr = $("<td>");
 
-                        td1.append($("<a>", 
+                        td1_lyr.append($("<a>", 
                                         {text: val["name"],
                                          title:  val["name"],
-                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}));
 
-                        var td2 = $("<td>Feature Layer</td>");
-                        var td3 = $("<td>" + geom_type + "</td>");
-                        var td4 = $("<td>" + service_name + "</td>");
+                        var td2_lyr = $("<td>Feature Layer</td>");
+                        var td3_lyr = $("<td>" + geom_type + "</td>");
+                        var td4_lyr = $("<td>").append($("<a>", 
+                            {text: service_name_abbr,
+                            title:  service_name_abbr,
+                            href:  services_directory + "/" + service_name + "/MapServer"}));
 
-                        tr.append(td1).append(td2).append(td3).append(td4).appendTo("#item_list");
+                        tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).appendTo("#item_list");
 
                         initialSort();
 
-                        var tr = $("<tr>");
+                        var tr= $("<tr>");
                         var td1 = $("<td>");
 
                         td1.append($("<a>", 
                                         {text: val["name"],
                                          title:  val["name"],
-                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}));
 
                         var td3 = $("<td>" + geom_type + "</td>");
-                        var td4 = $("<td>" + service_name + "</td>");
+                        var td4 = $("<td>").append($("<a>", 
+                            {text: service_name_abbr,
+                            title:  service_name_abbr,
+                            href:  services_directory + "/" + service_name + "/MapServer"}));
                         var td5 =  $("<td>" + layer_index + "</td>");
 
                         tr.append(td4).append(td5).append(td1).append(td3).appendTo("#item_list_byService_layers");
@@ -218,21 +227,25 @@
                     });
 
                     $.each(response.tables, function(key, val) {
+                     
                         var layer_index = val["id"];
-                        var tr = $("<tr>");
-                        tr.addClass("standalone-table");
-                        var td1 = $("<td>");
+                        var tr_lyr = $("<tr>");
+                        tr_lyr.addClass("standalone-table");
+                        var td1_lyr = $("<td>");
 
-                        td1.append($("<a>", 
+                        td1_lyr.append($("<a>", 
                                         {text: val["name"],
                                          title:  val["name"],
-                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}));
 
-                        var td2 = $("<td>Table</td>");
-                        var td3 = $("<td>-</td>");
-                        var td4 = $("<td>" + service_name + "</td>");
+                        var td2_lyr = $("<td>Table</td>");
+                        var td3_lyr = $("<td>-</td>");
+                        var td4_lyr = $("<td>").append($("<a>", 
+                            {text: service_name_abbr,
+                            title:  service_name_abbr,
+                            href:  services_directory + "/" + service_name + "/MapServer"}));
 
-                        tr.append(td1).append(td2).append(td3).append(td4).appendTo("#item_list");
+                        tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).appendTo("#item_list");
 
                         initialSort();
 
@@ -242,9 +255,12 @@
                         td1.append($("<a>", 
                                         {text: val["name"],
                                          title:  val["name"],
-                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}))
+                                         href:  services_directory + "/" + service_name + "/MapServer/" + val["id"]}));
 
-                        var td4 = $("<td>" + service_name + "</td>");
+                        var td4 = $("<td>").append($("<a>", 
+                            {text: service_name_abbr,
+                            title:  service_name_abbr,
+                            href:  services_directory + "/" + service_name + "/MapServer"}));
                         var td5 =  $("<td>" + layer_index + "</td>");
 
                         tr.append(td4).append(td5).append(td1).appendTo("#item_list_byService_tables");
