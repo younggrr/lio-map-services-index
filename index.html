@@ -55,7 +55,10 @@
     <label class="form-check-label" for="layertypeFeatureLayer">Layer</label>
 </div>
 
+<p id="serviceCount" style="margin-left:10px;padding-top:20px;"></p>
+<p id="layerCount" data-layer-count=0 style="margin-left:10px;margin-top:-15px;"></p>
 <div id="byLayer" style="display:none;padding-top:10px;">
+
 <table id="item_list" class="table">
 <tr>
     <th>Name</th>
@@ -168,6 +171,8 @@
     });
 
     $.get(url).done(function(response) {
+
+        $("#serviceCount").text("Service count: " + String(response.services.length));
         
         $.each(response.services, function(key,val) {
 
@@ -182,6 +187,9 @@
                 url = services_directory + "/" + service_name + "/MapServer?f=json";
 
                 $.get(url).done(function(response) {
+
+                    $("#layerCount").attr("data-layer-count", parseInt($("#layerCount").attr("data-layer-count")) + response.layers.length);
+                    $("#layerCount").text("Layer count: " + String($("#layerCount").attr("data-layer-count")));
                     
                     $.each(response.layers, function(key, val) {
                       
