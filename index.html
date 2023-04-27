@@ -249,14 +249,41 @@
                             title:  service_name_abbr,
                             href:  services_directory + "/" + service_name + "/MapServer"}));
 
-                        var url2 = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B+%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22EFFECTIVE_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22+%7D%2C%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22SYSTEM_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22+%7D%5D&f=json"
-                        var td5_lyr;
-                        var td6_lyr;
+                        var url_effective_dt = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B%7B%22statisticType%22%3A%22max%22%2C%22onStatisticField%22%3A%22EFFECTIVE_DATETIME%22%2C%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22%7D%5D&f=json"
+                        var url_system_dt = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B%7B%22statisticType%22%3A%22max%22%2C%22onStatisticField%22%3A%22SYSTEM_DATETIME%22%2C%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22%7D%5D&f=json"
+                        
+                        var td5_lyr = $("<td/>").text("Calculating...").attr("id", "effective_dt_" + service_name_abbr + layer_index);
+                        var td6_lyr = $("<td/>").text("Calculating...").attr("id", "system_dt_" + service_name_abbr + layer_index);
+                        tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
+                        sortList();
+                        
                         $.ajax({type: "GET",
-                                url: url2,
+                                url: url_effective_dt,
                                 success: function(result) {
 
                                     var effective_dt = '';
+
+                                    if (result.hasOwnProperty("features") && result.features.length) {
+
+                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
+                                            var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
+                                            var effective_dt = (new Date(effective_dt_unix)).toLocaleString();
+                                        }
+                                    }
+
+                                    $("#effective_dt_" + service_name_abbr + layer_index).text(effective_dt)
+        
+                                    },
+                                error: function () {
+                                    $("#effective_dt_" + service_name_abbr + layer_index).text("Error")
+                                }
+                                ,
+                                async: true});
+
+                        $.ajax({type: "GET",
+                                url: url_system_dt,
+                                success: function(result) {
+
                                     var system_dt = '';
 
                                     if (result.hasOwnProperty("features") && result.features.length) {
@@ -264,33 +291,17 @@
                                             var system_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_SYSTEM;
                                             system_dt = (new Date(system_dt_unix)).toLocaleString();
                                         }
-                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
-                                            var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
-                                            var effective_dt = (new Date(effective_dt_unix)).toLocaleString();
-                                            
-                                        }
-                                        
+                                       
                                     }
 
-                                    td5_lyr = $("<td\>").text(effective_dt);
-                                    // var td5_lyr = $("<td>" + getEffectiveDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
-                                    td6_lyr = $("<td\>").text(system_dt);
-
-                                   
+                                    $("#system_dt_" + service_name_abbr + layer_index).text(system_dt)
+        
                                     },
                                 error: function () {
-                                    td5_lyr = $("<td\>");
-                        
-                                    td6_lyr = $("<td\>");
-                                },
-                                complete: function () {
-                                    tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
-                                    sortList();
+                                    $("#system_dt_" + service_name_abbr + layer_index).text("Error")
                                 }
                                 ,
                                 async: true});
-
-                        
 
                         var tr= $("<tr>");
                         var td1 = $("<td>");
@@ -330,14 +341,41 @@
                             title:  service_name_abbr,
                             href:  services_directory + "/" + service_name + "/MapServer"}));
 
-                        var url2 = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B+%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22EFFECTIVE_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22+%7D%2C%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22SYSTEM_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22+%7D%5D&f=json"
-                        var td5_lyr;
-                        var td6_lyr;
+                        var url_effective_dt = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B%7B%22statisticType%22%3A%22max%22%2C%22onStatisticField%22%3A%22EFFECTIVE_DATETIME%22%2C%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22%7D%5D&f=json"
+                        var url_system_dt = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B%7B%22statisticType%22%3A%22max%22%2C%22onStatisticField%22%3A%22SYSTEM_DATETIME%22%2C%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22%7D%5D&f=json"
+                        var td5_lyr = $("<td/>").text("Calculating...").attr("id", "effective_dt_" + service_name_abbr + layer_index);
+                        var td6_lyr = $("<td/>").text("Calculating...").attr("id", "system_dt_" + service_name_abbr + layer_index);
+
+                        tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
+                        sortList();
+
                         $.ajax({type: "GET",
-                                url: url2,
+                                url: url_effective_dt,
                                 success: function(result) {
 
                                     var effective_dt = '';
+
+                                    if (result.hasOwnProperty("features") && result.features.length) {
+
+                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
+                                            var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
+                                            var effective_dt = (new Date(effective_dt_unix)).toLocaleString();
+                                        }
+                                    }
+
+                                    $("#effective_dt_" + service_name_abbr + layer_index).text(effective_dt)
+        
+                                    },
+                                error: function () {
+                                    $("#effective_dt_" + service_name_abbr + layer_index).text("Error")
+                                }
+                                ,
+                                async: true});
+
+                        $.ajax({type: "GET",
+                                url: url_system_dt,
+                                success: function(result) {
+
                                     var system_dt = '';
 
                                     if (result.hasOwnProperty("features") && result.features.length) {
@@ -345,37 +383,19 @@
                                             var system_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_SYSTEM;
                                             system_dt = (new Date(system_dt_unix)).toLocaleString();
                                         }
-                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
-                                            var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
-                                            var effective_dt = (new Date(effective_dt_unix)).toLocaleString();
-                                            
-                                        }
-                                        
+                                       
                                     }
 
-                                    td5_lyr = $("<td\>").text(effective_dt);
-                                    // var td5_lyr = $("<td>" + getEffectiveDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
-                                    td6_lyr = $("<td\>").text(system_dt);
-
-                                   
+                                    $("#system_dt_" + service_name_abbr + layer_index).text(system_dt)
+        
                                     },
                                 error: function () {
-                                    td5_lyr = $("<td\>");
-                        
-                                    td6_lyr = $("<td\>");
-                                },
-                                complete: function () {
-                                    tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
-                                    sortList();
+                                    $("#system_dt_" + service_name_abbr + layer_index).text("Error")
                                 }
                                 ,
                                 async: true});
                
-                        // var td5_lyr = $("<td>" + getEffectiveDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
-                        // var td6_lyr = $("<td>" + getSystemDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
-
-                        // tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
-
+                       
                         sortList();
 
                         var tr = $("<tr>");
