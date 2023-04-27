@@ -65,6 +65,8 @@
     <th>Type</th>
     <th>Geometry Type</th>
     <th>Service Name</th>
+    <th>Latest EFFECTIVE_DATETIME</th>
+    <th>Latest SYSTEM_DATETIME</th>
 </tr>
 
 </table>
@@ -119,7 +121,46 @@
         $("#item_list").append(elems);
     }
 
+    function getEffectiveDatetime(url) {
+ 
+        var url2 = url + "/query?outStatistics=%5B+%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22EFFECTIVE_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22+%7D%2C%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22SYSTEM_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22+%7D%5D&f=json"
+        $.ajax({type: "GET",
+                url: url2,
+                success: function(result) {
+                    if (result.hasOwnProperty("features") && result.features.length) {
+                    if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
+                        var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
+                        var effective_dt_readable = (new Date(effective_dt_unix)).toLocaleString();
+                        return effective_dt_readable;
+                    }
+                        else {
+                            return '';
+                              }     
+                    }
+                },
+                async: true})
     
+    }
+
+    function getSystemDatetime(url) {
+ 
+        var url2 = url + "/query?outStatistics=%5B+%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22EFFECTIVE_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22+%7D%2C%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22SYSTEM_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22+%7D%5D&f=json"
+        $.ajax({type: "GET",
+                url: url2,
+                success: function(result) {
+                    if (result.hasOwnProperty("features") && result.features.length) {
+                    if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_SYSTEM')) {
+                        var system_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_SYSTEM;
+                        var system_dt_readable = (new Date(system_dt_unix)).toLocaleString();
+                        return system_dt_readable;}
+                        else {
+                            return '';
+                            }     
+                    }
+                },
+                async: true})
+
+}
 
     // Build list of items
  
@@ -181,9 +222,6 @@
                 var service_name = val["name"];
                 var service_name_abbr = service_name.split("/")[1];
 
-                
-
-
                 url = services_directory + "/" + service_name + "/MapServer?f=json";
 
                 $.get(url).done(function(response) {
@@ -192,7 +230,7 @@
                     $("#layerCount").text("Layer count: " + String($("#layerCount").attr("data-layer-count")));
                     
                     $.each(response.layers, function(key, val) {
-                      
+
                         var layer_index = val["id"];
                         var geom_type = val["geometryType"];
                         var tr_lyr = $("<tr>");
@@ -211,7 +249,45 @@
                             title:  service_name_abbr,
                             href:  services_directory + "/" + service_name + "/MapServer"}));
 
-                        tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).appendTo("#item_list");
+                        var url2 = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B+%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22EFFECTIVE_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22+%7D%2C%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22SYSTEM_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22+%7D%5D&f=json"
+                        var td5_lyr;
+                        var td6_lyr;
+                        $.ajax({type: "GET",
+                                url: url2,
+                                success: function(result) {
+
+                                    var effective_dt = '';
+                                    var system_dt = '';
+
+                                    if (result.hasOwnProperty("features") && result.features.length) {
+                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_SYSTEM')) {
+                                            var system_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_SYSTEM;
+                                            system_dt = (new Date(system_dt_unix)).toLocaleString();
+                                        }
+                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
+                                            var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
+                                            var effective_dt = (new Date(effective_dt_unix)).toLocaleString();
+                                            
+                                        }
+                                        
+                                    }
+
+                                    td5_lyr = $("<td\>").text(effective_dt);
+                                    // var td5_lyr = $("<td>" + getEffectiveDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
+                                    td6_lyr = $("<td\>").text(system_dt);
+
+                                   
+                                    },
+                                error: function () {
+                                    td5_lyr = $("<td\>");
+                        
+                                    td6_lyr = $("<td\>");
+                                },
+                                complete: function () {
+                                    tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
+                                }
+                                ,
+                                async: true});
 
                         initialSort();
 
@@ -253,7 +329,50 @@
                             title:  service_name_abbr,
                             href:  services_directory + "/" + service_name + "/MapServer"}));
 
-                        tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).appendTo("#item_list");
+                        var url2 = services_directory + "/" + service_name + "/MapServer/" + val["id"] + "/query?outStatistics=%5B+%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22EFFECTIVE_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_Effective%22+%7D%2C%7B+%22statisticType%22%3A+%22max%22%2C+%22onStatisticField%22%3A+%22SYSTEM_DATETIME%22%2C+++++%22outStatisticFieldName%22%3A%22LastModifiedDate_System%22+%7D%5D&f=json"
+                        var td5_lyr;
+                        var td6_lyr;
+                        $.ajax({type: "GET",
+                                url: url2,
+                                success: function(result) {
+
+                                    var effective_dt = '';
+                                    var system_dt = '';
+
+                                    if (result.hasOwnProperty("features") && result.features.length) {
+                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_SYSTEM')) {
+                                            var system_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_SYSTEM;
+                                            system_dt = (new Date(system_dt_unix)).toLocaleString();
+                                        }
+                                        if (result.features[0].attributes.hasOwnProperty('LASTMODIFIEDDATE_EFFECTIVE')) {
+                                            var effective_dt_unix = result.features[0].attributes.LASTMODIFIEDDATE_EFFECTIVE;
+                                            var effective_dt = (new Date(effective_dt_unix)).toLocaleString();
+                                            
+                                        }
+                                        
+                                    }
+
+                                    td5_lyr = $("<td\>").text(effective_dt);
+                                    // var td5_lyr = $("<td>" + getEffectiveDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
+                                    td6_lyr = $("<td\>").text(system_dt);
+
+                                   
+                                    },
+                                error: function () {
+                                    td5_lyr = $("<td\>");
+                        
+                                    td6_lyr = $("<td\>");
+                                },
+                                complete: function () {
+                                    tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
+                                }
+                                ,
+                                async: true});
+               
+                        // var td5_lyr = $("<td>" + getEffectiveDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
+                        // var td6_lyr = $("<td>" + getSystemDatetime(services_directory + "/" + service_name + "/MapServer/" + val["id"]) + "</td>");
+
+                        // tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
 
                         initialSort();
 
