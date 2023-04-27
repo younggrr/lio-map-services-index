@@ -113,7 +113,7 @@
         return 0;
     };
 
-    function initialSort() {
+    function sortList() {
 
         var elems = $("#item_list > tbody").children("tr");
 
@@ -285,11 +285,12 @@
                                 },
                                 complete: function () {
                                     tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
+                                    sortList();
                                 }
                                 ,
                                 async: true});
 
-                        initialSort();
+                        
 
                         var tr= $("<tr>");
                         var td1 = $("<td>");
@@ -365,6 +366,7 @@
                                 },
                                 complete: function () {
                                     tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
+                                    sortList();
                                 }
                                 ,
                                 async: true});
@@ -374,7 +376,7 @@
 
                         // tr_lyr.append(td1_lyr).append(td2_lyr).append(td3_lyr).append(td4_lyr).append(td5_lyr).append(td6_lyr).appendTo("#item_list");
 
-                        initialSort();
+                        sortList();
 
                         var tr = $("<tr>");
                         var td1 = $("<td>");
